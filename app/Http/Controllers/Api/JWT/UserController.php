@@ -2,18 +2,17 @@
 
 namespace App\Http\Controllers\Api\JWT;
 
-use App\Actions\AuthActionByUser;
 use App\DTO\UserDTO;
 use App\DTO\UserUpdateDTO;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\JWT\DestroyUserRequestJWT;
 use App\Http\Requests\JWT\UserRequestJWT;
-use App\Http\Requests\JWT\UserUpdateRequestJWT;
+use App\Http\Requests\JWT\UpdateUserRequestJWT;
 use App\Http\Resources\UserResource;
 use App\Http\Resources\UserResourceCollection;
 use App\Models\Interfaces\UserRepositoryInterface;
 use App\Models\User;
 use App\Services\UserService;
-use Illuminate\Auth\AuthManager;
 use Illuminate\Http\JsonResponse;
 
 class UserController extends Controller
@@ -53,13 +52,10 @@ class UserController extends Controller
      * Update the specified resource in storage.
      */
     public function update(
-        UserUpdateRequestJWT $request,
+        UpdateUserRequestJWT $request,
         User $user,
-        UserService $userService,
-        AuthManager $authManager,
-        AuthActionByUser $authAction
+        UserService $userService
     ): UserResource {
-        $authAction($user, $authManager);
         $userDTO = new UserUpdateDTO(
             name: $request->get('name'),
             email: $request->get('email'),
@@ -74,12 +70,10 @@ class UserController extends Controller
      * Remove the specified resource from storage.
      */
     public function destroy(
+        DestroyUserRequestJWT $request,
         User $user,
-        UserService $userService,
-        AuthManager $authManager,
-        AuthActionByUser $authAction
+        UserService $userService
     ): JsonResponse{
-        $authAction($user, $authManager);
         $userService->delete($user->id);
 
         return response()->json(null, 204);

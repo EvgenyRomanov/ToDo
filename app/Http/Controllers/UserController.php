@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\UserAuthRequest;
-use App\Http\Requests\UserRegisterRequest;
+use App\Http\Requests\AuthUserRequest;
+use App\Http\Requests\RegisterUserRequest;
 use Illuminate\Auth\AuthManager;
 use Illuminate\Http\Request;
 use App\Models\User;
@@ -26,7 +26,7 @@ class UserController
         return view('register');
     }
 
-    public function register(UserRegisterRequest $request, AuthManager $authManager): RedirectResponse
+    public function register(RegisterUserRequest $request, AuthManager $authManager): RedirectResponse
     {
         $data = $request->toArray();
         $data['password'] = bcrypt($data['password']);
@@ -55,7 +55,7 @@ class UserController
         return redirect('/')->with('message',  trans('flush.logout'));
     }
 
-    public function authenticate(UserAuthRequest $request, AuthManager $authManager): RedirectResponse
+    public function authenticate(AuthUserRequest $request, AuthManager $authManager): RedirectResponse
     {
         $credentials = [
             'email' => $request->get('email'),

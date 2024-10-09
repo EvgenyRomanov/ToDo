@@ -68,7 +68,6 @@ class TaskControllerTest extends TestCase
                 $mock->shouldReceive('sendMessage')->once();
             })
         );
-
         $user = User::first();
         $response = $this->actingAs($user)->post("/tasks", [
             'title' => fake()->sentence,

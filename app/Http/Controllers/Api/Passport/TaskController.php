@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers\Api\Passport;
 
-use App\Actions\AuthAction;
 use App\DTO\TaskDTO;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\DestroyTaskRequest;
+use App\Http\Requests\ShowTaskRequest;
 use App\Http\Requests\TaskRequest;
 use App\Http\Resources\TaskResource;
 use App\Http\Resources\TaskResourceCollection;
@@ -53,9 +54,8 @@ class TaskController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Task $task, AuthAction $authAction, AuthManager $authManager): TaskResource
+    public function show(ShowTaskRequest $request, Task $task): TaskResource
     {
-        $authAction($task, $authManager);
         return new TaskResource($task);
     }
 
@@ -66,11 +66,8 @@ class TaskController extends Controller
         TaskRequest $request,
         Task $task,
         TaskService $taskService,
-        UserRepositoryInterface $userRepository,
-        AuthAction $authAction,
-        AuthManager $authManager
+        UserRepositoryInterface $userRepository
     ): TaskResource {
-        $authAction($task, $authManager);
         $user = $userRepository->findUser($task->user_id);
         $taskDTO = new TaskDTO(
             $request->get('title'),
@@ -87,12 +84,10 @@ class TaskController extends Controller
      * Remove the specified resource from storage.
      */
     public function destroy(
+        DestroyTaskRequest $request,
         Task $task,
-        TaskService $taskService,
-        AuthAction $authAction,
-        AuthManager $authManager
+        TaskService $taskService
     ): JsonResponse {
-        $authAction($task, $authManager);
         $taskService->delete($task->id);
 
         return response()->json(null, 204);

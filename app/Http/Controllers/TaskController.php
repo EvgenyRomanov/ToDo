@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Actions\AuthAction;
 use App\DTO\TaskDTO;
+use App\Http\Requests\DestroyTaskRequest;
+use App\Http\Requests\EditTaskRequest;
+use App\Http\Requests\ShowTaskRequest;
 use App\Http\Requests\TaskRequest;
 use App\Models\Interfaces\TaskRepositoryInterface;
 use App\Models\Interfaces\UserRepositoryInterface;
@@ -53,10 +55,8 @@ class TaskController extends Controller
         return redirect('/tasks')->with('message', trans('flush.create'));
     }
 
-    public function show(Task $task, AuthAction $authAction, AuthManager $authManager): View|string
+    public function show(ShowTaskRequest $request, Task $task): View|string
     {
-        $authAction($task, $authManager);
-
         return Cache::remember("tasks:view:{$task->id}", 60, function () use ($task) {
             return view('tasks/view', [
                 'task' => $task
@@ -64,10 +64,8 @@ class TaskController extends Controller
         });
     }
 
-    public function edit(Task $task, AuthAction $authAction, AuthManager $authManager): View
+    public function edit(EditTaskRequest $request, Task $task): View
     {
-        $authAction($task, $authManager);
-
         return view("tasks/edit", [
             'task' => $task
         ]);
@@ -78,10 +76,7 @@ class TaskController extends Controller
         Task $task,
         TaskService $taskService,
         UserRepositoryInterface $userRepository,
-        AuthAction $authAction,
-        AuthManager $authManager
     ): RedirectResponse {
-        $authAction($task, $authManager);
         $user = $userRepository->findUser($task->user_id);
         $taskDTO = new TaskDTO(
             $request->get('title'),
@@ -94,9 +89,8 @@ class TaskController extends Controller
         return redirect('/tasks')->with('message', trans('flush.update'));
     }
 
-    public function destroy(Task $task, TaskService $taskService, AuthAction $authAction, AuthManager $authManager): RedirectResponse
+    public function destroy(DestroyTaskRequest $request, Task $task, TaskService $taskService): RedirectResponse
     {
-        $authAction($task, $authManager);
         $taskService->delete($task->id);
 
         return redirect('/tasks')->with('message', trans('flush.delete'));

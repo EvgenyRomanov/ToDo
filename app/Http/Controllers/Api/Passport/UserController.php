@@ -2,18 +2,18 @@
 
 namespace App\Http\Controllers\Api\Passport;
 
-use App\Actions\AuthActionByUser;
-use App\Actions\AuthActionByUserAdmin;
 use App\DTO\UserDTO;
 use App\DTO\UserUpdateDTO;
-use App\Http\Requests\JWT\UserRequestJWT;
-use App\Http\Requests\JWT\UserUpdateRequestJWT;
+use App\Http\Requests\Passport\DestroyUserRequest;
+use App\Http\Requests\Passport\IndexUserRequest;
+use App\Http\Requests\Passport\ShowUserRequest;
+use App\Http\Requests\Passport\StoreUserRequest;
+use App\Http\Requests\Passport\UpdateUserRequest;
 use App\Http\Resources\UserResource;
 use App\Http\Resources\UserResourceCollection;
 use App\Models\Interfaces\UserRepositoryInterface;
 use App\Models\User;
 use App\Services\UserService;
-use Illuminate\Auth\AuthManager;
 use Illuminate\Http\JsonResponse;
 
 class UserController
@@ -22,11 +22,9 @@ class UserController
      * Display a listing of the resource.
      */
     public function index(
+        IndexUserRequest $request,
         UserRepositoryInterface $userRepository,
-        AuthManager $authManager,
-        AuthActionByUserAdmin $authActionByUserAdmin
     ): UserResourceCollection {
-        $authActionByUserAdmin($authManager);
         return new UserResourceCollection($userRepository->getAllUsers());
     }
 
@@ -34,12 +32,9 @@ class UserController
      * Store a newly created resource in storage.
      */
     public function store(
-        UserRequestJWT $request,
-        UserService $userService,
-        AuthManager $authManager,
-        AuthActionByUserAdmin $authActionByUserAdmin
+        StoreUserRequest $request,
+        UserService $userService
     ): UserResource {
-        $authActionByUserAdmin($authManager);
         $userDTO = new UserDTO(
             name: $request->get('name'),
             email: $request->get('email'),
@@ -53,9 +48,8 @@ class UserController
     /**
      * Display the specified resource.
      */
-    public function show(User $user, AuthManager $authManager, AuthActionByUser $authAction): UserResource
+    public function show(ShowUserRequest $request, User $user): UserResource
     {
-        $authAction($user, $authManager);
         return new UserResource($user);
     }
 
@@ -63,13 +57,10 @@ class UserController
      * Update the specified resource in storage.
      */
     public function update(
-        UserUpdateRequestJWT $request,
+        UpdateUserRequest $request,
         User $user,
-        UserService $userService,
-        AuthManager $authManager,
-        AuthActionByUser $authAction
+        UserService $userService
     ): UserResource {
-        $authAction($user, $authManager);
         $userDTO = new UserUpdateDTO(
             name: $request->get('name'),
             email: $request->get('email'),
@@ -84,12 +75,10 @@ class UserController
      * Remove the specified resource from storage.
      */
     public function destroy(
+        DestroyUserRequest $request,
         User $user,
-        UserService $userService,
-        AuthManager $authManager,
-        AuthActionByUser $authAction
+        UserService $userService
     ): JsonResponse{
-        $authAction($user, $authManager);
         $userService->delete($user->id);
 
         return response()->json(null, 204);

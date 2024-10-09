@@ -3,15 +3,15 @@
 namespace App\Http\Controllers\Api\Passport;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Passport\UserAuthRequestOAuth;
-use App\Http\Requests\Passport\UserRegisterRequestOAuth;
+use App\Http\Requests\Passport\AuthUserRequestOAuth;
+use App\Http\Requests\Passport\RegisterUserRequestOAuth;
 use App\Models\User;
 use Illuminate\Auth\AuthManager;
 use Illuminate\Http\JsonResponse;
 
 class OAuthController extends Controller
 {
-    public function register(UserRegisterRequestOAuth $request): JsonResponse
+    public function register(RegisterUserRequestOAuth $request): JsonResponse
     {
         $data = $request->toArray();
         $data['password'] = bcrypt($data['password']);
@@ -24,7 +24,7 @@ class OAuthController extends Controller
         return $this->sendResponse($success, 'User register successfully.');
     }
 
-    public function login(UserAuthRequestOAuth $request, AuthManager $authManage): JsonResponse
+    public function login(AuthUserRequestOAuth $request, AuthManager $authManage): JsonResponse
     {
         if (
             $authManage
